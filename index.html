@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gemini Chat 🤖</title>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --card-bg: #f7f7f8;
+            --text: #303134;
+            --accent: #10a37f;
+            --border: #e5e5e5;
+            --user-bg: #dff9fb;
+            --ai-bg: #ffffff;
+            --shadow: rgba(0,0,0,0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Roboto', sans-serif;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            border-left: 1px solid var(--border);
+            border-right: 1px solid var(--border);
+        }
+
+        .header {
+            text-align: center;
+            padding: 24px 0 16px;
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: var(--accent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .header svg {
+            height: 28px;
+        }
+
+        .chat-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px 0;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+            margin-bottom: 20px;
+        }
+
+        .message {
+            display: flex;
+            gap: 16px;
+            max-width: 100%;
+            animation: fadeIn 0.3s ease-in-out;
+            position: relative;
+        }
+
+        .avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            font-weight: bold;
+            color: white;
+        }
+
+        .user .avatar {
+            background: #54a0ff;
+        }
+
+        .ai .avatar {
+            background: var(--accent);
+        }
+
+        .bubble {
+            padding: 16px 20px;
+            border-radius: 18px;
+            line-height: 1.6;
+            max-width: 85%;
+            box-shadow: 0 1px 2px var(--shadow);
+            position: relative;
+        }
+
+        .user .bubble {
+            background: var(--user-bg);
+            border-bottom-right-radius: 4px;
+        }
+
+        .ai .bubble {
+            background: var(--ai-bg);
+            border: 1px solid var(--border);
+            border-bottom-left-radius: 4px;
+        }
+
+        .typing {
+            display: flex;
+            gap: 16px;
+            padding-left: 16px;
+        }
+
+        .typing .avatar {
+            background: var(--accent);
+        }
+
+        .typing-dots {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            background: var(--ai-bg);
+            border: 1px solid var(--border);
+            padding: 12px 16px;
+            border-radius: 18px;
+            border-bottom-left-radius: 4px;
+        }
+
+        .typing-dots span {
+            height: 8px;
+            width: 8px;
+            background: #aaa;
+            border-radius: 50%;
+            display: inline-block;
+            animation: typing 1.4s infinite ease-in-out;
+        }
+
+        .typing-dots span:nth-child(1) { animation-delay: 0s; }
+        .typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes typing {
+            0%, 60%, 100% { transform: translateY(0); }
+            30% { transform: translateY(-5px); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .input-area {
+            display: flex;
+            gap: 16px;
+            padding: 16px 0;
+            margin-top: auto;
+            border-top: 1px solid var(--border);
+        }
+
+        .input-area input {
+            flex: 1;
+            padding: 16px 20px;
+            border: 1px solid var(--border);
+            border-radius: 50px;
+            font-size: 1rem;
+            outline: none;
+            transition: border 0.3s;
+        }
+
+        .input-area input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(16, 163, 127, 0.1);
+        }
+
+        .input-area button {
+            padding: 16px 24px;
+            border: none;
+            border-radius: 50px;
+            background: var(--accent);
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: filter 0.2s;
+            min-width: 100px;
+        }
+
+        .input-area button:hover {
+            filter: brightness(1.1);
+        }
+
+        .tools {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+            font-size: 0.85rem;
+            color: #888;
+        }
+
+        .tools a {
+            color: var(--accent);
+            text-decoration: none;
+        }
+
+        .copy-btn {
+            position: absolute;
+            top: 8px;
+            right: 10px;
+            font-size: 0.9rem;
+            background: transparent;
+            border: none;
+            color: #aaa;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .bubble:hover .copy-btn {
+            opacity: 1;
+        }
+
+        .copy-btn:hover {
+            color: var(--accent);
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 12px;
+                border: none;
+            }
+            .bubble {
+                max-width: 92%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 2L2 7L12 12L22 7L12 2Z" fill="#10a37f"/>
+            <path d="M2 17L12 22L22 17L12 12L2 17Z" fill="#10a37f"/>
+            <path d="M2 7L12 12L2 17V7Z" fill="#10a37f"/>
+            <path d="M22 7L12 12L22 17V7Z" fill="#10a37f"/>
+        </svg>
+        Gemini Chat
+    </div>
+
+    <div class="chat-container" id="chatbox">
+        <div class="message ai">
+            <div class="avatar">G</div>
+            <div class="bubble">
+                Hi there! 👋 I’m powered by <strong>Google Gemini</strong>.<br>
+                Ask me anything — I’m here to help!
+                <button class="copy-btn" onclick="copyText(this)">📋</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="input-area">
+        <input type="text" id="userInput" placeholder="Send a message..." autofocus>
+        <button id="sendBtn">Send</button>
+    </div>
+
+    <div class="tools">
+        <span>Powered by Google Gemini API</span>
+        <a href="https://aistudio.google.com/" target="_blank">Manage API</a>
+    </div>
+
+    <script>
+        // ✅ ———— EDIT YOUR API KEY HERE ———— ✅
+        const GEMINI_API_KEY = "put_ur_api_token_here"; // ← REPLACE THIS WITH YOUR KEY
+        // ✅ ———————————————— ✅
+
+        const chatbox = document.getElementById('chatbox');
+        const userInput = document.getElementById('userInput');
+        const sendBtn = document.getElementById('sendBtn');
+
+        const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${GEMINI_API_KEY}`;
+
+        async function getGeminiResponse(prompt, history = []) {
+            try {
+                const contents = history.map(msg => ({
+                    role: msg.role === 'user' ? 'user' : 'model',
+                    parts: [{ text: msg.content }]
+                }));
+
+                contents.push({
+                    role: 'user',
+                    parts: [{ text: prompt }]
+                });
+
+                const response = await fetch(GEMINI_API_URL, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        contents: contents,
+                        generationConfig: {
+                            maxOutputTokens: 2048,
+                            temperature: 0.7,
+                            topP: 0.95
+                        }
+                    })
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({}));
+                    console.error("[GEMINI API ERROR]", errorData);
+                    throw new Error(`Status ${response.status}: ${JSON.stringify(errorData)}`);
+                }
+
+                const data = await response.json();
+                return data.candidates[0].content.parts[0].text.trim();
+
+            } catch (error) {
+                console.warn("⚠️ Gemini API failed:", error.message);
+                const fallbacks = [
+                    "Oops! Gemini API might be down or key expired. This is a friendly placeholder 😊",
+                    "I’m in demo mode right now — but still happy to chat with you!",
+                    "Looks like my brain (Gemini API) is offline. Let me answer with heart instead ❤️",
+                    "API error? No worries — I’ve got backup intelligence!",
+                    "Pro tip: Check your Gemini key at aistudio.google.com if you want real AI power!"
+                ];
+                return fallbacks[Math.floor(Math.random() * fallbacks.length)];
+            }
+        }
+
+        function addMessage(text, sender) {
+            const msgDiv = document.createElement('div');
+            msgDiv.classList.add('message', sender);
+
+            const avatar = document.createElement('div');
+            avatar.classList.add('avatar');
+            avatar.textContent = sender === 'user' ? 'U' : 'G';
+
+            const bubble = document.createElement('div');
+            bubble.classList.add('bubble');
+            bubble.innerHTML = text.replace(/\n/g, '<br>') +
+                `<button class="copy-btn" onclick="copyText(this)">📋</button>`;
+
+            msgDiv.appendChild(avatar);
+            msgDiv.appendChild(bubble);
+            chatbox.appendChild(msgDiv);
+            chatbox.scrollTop = chatbox.scrollHeight;
+        }
+
+        function showTyping() {
+            hideTyping();
+            const typingDiv = document.createElement('div');
+            typingDiv.classList.add('message', 'typing');
+            typingDiv.id = 'typingIndicator';
+
+            const avatar = document.createElement('div');
+            avatar.classList.add('avatar');
+            avatar.textContent = 'G';
+
+            const dots = document.createElement('div');
+            dots.classList.add('typing-dots');
+            dots.innerHTML = '<span></span><span></span><span></span>';
+
+            typingDiv.appendChild(avatar);
+            typingDiv.appendChild(dots);
+            chatbox.appendChild(typingDiv);
+            chatbox.scrollTop = chatbox.scrollHeight;
+        }
+
+        function hideTyping() {
+            const typingDiv = document.getElementById('typingIndicator');
+            if (typingDiv) typingDiv.remove();
+        }
+
+        function copyText(button) {
+            const bubble = button.parentElement;
+            const text = bubble.innerText.replace('📋', '').trim();
+            navigator.clipboard.writeText(text).then(() => {
+                button.textContent = '✅';
+                setTimeout(() => { button.textContent = '📋'; }, 1500);
+            }).catch(err => {
+                console.error("Copy failed:", err);
+            });
+        }
+
+        async function handleSend() {
+            const text = userInput.value.trim();
+            if (!text) {
+                userInput.placeholder = "Please type a message...";
+                setTimeout(() => userInput.placeholder = "Send a message...", 2000);
+                return;
+            }
+
+            addMessage(text, 'user');
+            userInput.value = '';
+            userInput.focus();
+
+            showTyping();
+
+            const history = [];
+            const msgElements = chatbox.querySelectorAll('.message:not(.typing)');
+            msgElements.forEach(el => {
+                const isUser = el.classList.contains('user');
+                const text = el.querySelector('.bubble').innerText.replace('📋', '').trim();
+                history.push({
+                    role: isUser ? 'user' : 'assistant',
+                    content: text
+                });
+            });
+
+            try {
+                const aiResponse = await getGeminiResponse(text, history);
+                hideTyping();
+                addMessage(aiResponse, 'ai');
+            } catch (error) {
+                hideTyping();
+                addMessage("⚠️ Couldn't reach Gemini AI. Showing fallback response.", "ai");
+                console.error("Full error:", error);
+            }
+        }
+
+        sendBtn.addEventListener('click', handleSend);
+        userInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') handleSend();
+        });
+
+        setTimeout(() => userInput.focus(), 300);
+    </script>
+</body>
+</html>
