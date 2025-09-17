@@ -7,7 +7,11 @@
 
 ---
 
+
 ## 🌟 Features
+
+<div align="center">
+  <img src="https://cdn.discordapp.com/attachments/1353861222898077878/1418013887453991052/image.png?ex=68cc93d8&is=68cb4258&hm=8c8987879eb808e36ab5d1a907624fb891e797b2c3b864627502696e25486e5b&" width="120" alt="screenshot"/>
 
 - ✅ **Looks & feels like ChatGPT** — clean, modern, responsive UI
 - ✅ **Powered by Google Gemini** — smart, fast, free tier available
